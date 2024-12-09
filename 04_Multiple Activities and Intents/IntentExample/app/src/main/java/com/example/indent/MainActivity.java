@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -18,10 +18,12 @@ import android.widget.Toast;
 import java.io.Serializable;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final int REQUEST_CODE = 100;
+    public static final int REQUEST_IMAGE_CAPTURE = 1;
+
     private EditText nameEt;
     private TextView ageTv;
-    int passedCode = 100;
-    int REQUEST_IMAGE_CAPTURE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +37,10 @@ public class MainActivity extends AppCompatActivity {
         // Generate Intent object
         Intent intent = new Intent(this, SecondActivity.class);
         // Pass the nameEt value to the secondActivity
-        intent.putExtra("name", nameEt.getText().toString());   // pass key/value pair information
+        intent.putExtra(SecondActivity.NAME_KEY, nameEt.getText().toString());   // pass key/value pair information
 
         User user = new User(nameEt.getText().toString(), 20, "dcoh@myseneca.ca"); // Initialize using constructor
-        intent.putExtra("user", (Serializable)user);
+        intent.putExtra(SecondActivity.USER_KEY, (Parcelable)user);
         startActivity(intent);
         // When clicking button current activity is on background
     }
@@ -55,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
         // Generate Intent object
         Intent intent = new Intent(this, SecondActivity.class);
         // Pass the nameEt value to the secondActivity
-        intent.putExtra("name", nameEt.getText().toString());
-        startActivityForResult(intent, passedCode);
+        intent.putExtra(SecondActivity.NAME_KEY, nameEt.getText().toString());
+        startActivityForResult(intent, REQUEST_CODE);
     }
 
 
@@ -84,10 +86,13 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         /* check if the Request Code is same as what is passed Code (here, it is 100) */
-        if(requestCode == passedCode){
+        if(requestCode == REQUEST_CODE){
             if(resultCode == RESULT_OK){
-                ageTv.setText(data.getStringExtra("age"));
-                Toast.makeText(this, data.getStringExtra("age"), Toast.LENGTH_LONG).show();
+                if(data.hasExtra(SecondActivity.AGE_KEY)){
+                    String age = data.getStringExtra(SecondActivity.AGE_KEY);
+                    ageTv.setText(age);
+                    Toast.makeText(this, age, Toast.LENGTH_LONG).show();
+                }
             }else{
                 Toast.makeText(this, "no Result", Toast.LENGTH_LONG).show();
             }
@@ -101,6 +106,5 @@ public class MainActivity extends AppCompatActivity {
             imageView.setImageBitmap(image);
         }
     }
-
 
 }
